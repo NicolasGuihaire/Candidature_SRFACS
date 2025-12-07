@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidature Stratégique - Nicolas & Aurélie</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Police Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* Gris très clair pour le fond global (slate-100) */
+            color: #1e293b;
+        }
+
+        /* --- STYLES SPÉCIFIQUES FIDÈLES AUX CAPTURES --- */
+
+        /* Navbar */
+        .nav-link {
+            color: #475569;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .nav-link:hover { color: #2563eb; }
+
+        /* Titre Principal avec Dégradé */
+        .title-gradient-text {
+            background: linear-gradient(to right, #2563eb, #f97316); /* Bleu vers Orange */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Soulignement des titres de section (Générique) */
+        .section-underline {
+            width: 50px;
+            height: 4px;
+            background: linear-gradient(to right, #2563eb, #f97316);
+            border-radius: 2px;
+            margin-top: 0.5rem;
+        }
+
+        /* Soulignement de la section Expertise (plus large comme dans l'image) */
+        .expertise-underline {
+            width: 150px; /* Plus large */
+            height: 5px;
+            background: linear-gradient(to right, #2563eb, #f97316);
+            border-radius: 3px;
+            margin-top: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Cartes Cycles */
+        .card-cycle {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Ombre plus marquée */
+            padding: 2rem;
+            border-top: 6px solid; /* Bordure colorée en haut */
+        }
+        .border-nicolas { border-color: #2563eb; }
+        .border-aurelie { border-color: #f97316; }
+
+        /* Bloc Profils Pédagogiques */
+        .profile-box {
+            border-left-width: 4px;
+            padding: 1rem;
+            background-color: #f8fafc;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .profile-box-blue { border-left-color: #2563eb; background-color: #eff6ff; }
+        .profile-box-orange { border-left-color: #f97316; background-color: #fff7ed; }
+
+        /* Section Viabilité (Carte Sombre) */
+        .viability-card-dark {
+            background-color: #0f172a; /* Slate 900 */
+            color: white;
+            border-radius: 1rem;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Timeline (Chronologie) */
+        .timeline-container {
+            position: relative;
+            /* Diminue le padding-left car le .timeline-dot est positionné à -39px */
+            padding-left: 2.5rem; 
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2.5rem; /* Espace entre les items */
+        }
+        
+        /* Style pour les segments de ligne entre les étapes */
+        .timeline-segment {
+            position: absolute;
+            left: -31px; /* X position: aligné avec le centre du dot ( -39px + 16px/2 = -31px ) */
+            top: 20px; /* Démarre sous le point actuel */
+            width: 2px;
+            /* La hauteur doit aller du bas du point actuel jusqu'au centre du point suivant */
+            height: calc(100% + 5px); 
+            z-index: 5;
+        }
+
+        /* Ligne pleine pour le passé/présent */
+        .timeline-segment.segment-solid {
+            background-color: #cbd5e1;
+        }
+
+        /* Ligne pointillée pour le futur */
+        .timeline-segment.segment-dashed {
+            border-left: 2px dashed #cbd5e1;
+            background-color: transparent;
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            left: -39px; /* Position X alignée avec le segment */
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 1px #cbd5e1;
+            z-index: 10; /* Toujours au-dessus de la ligne */
+        }
+        .dot-gray { background-color: #94a3b8; }
+        .dot-blue { background-color: #3b82f6; }
+        .dot-orange { background-color: #f97316; }
+        .dot-green { background-color: #22c55e; }
+
+        /* Styles spécifiques pour le graphique Doughnut */
+        .doughnut-chart-container {
+            position: relative;
+            width: 100%;
+            height: 250px; /* Taille fixe pour le graphique */
+            margin: 0 auto;
+        }
+        .doughnut-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .doughnut-color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 0.5rem;
+        }
+        .doughnut-legend {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding-left: 1rem;
+        }
+        
+        /* Soulignement pour le titre "Validation de l'Expertise" */
+        .citation-underline {
+            width: 150px; /* Largeur similaire à expertise-underline */
+            height: 5px;
+            background: linear-gradient(to right, #2563eb, #f97316);
+            border-radius: 3px;
+            margin-top: 0.5rem;
+            margin-bottom: 2rem;
+            margin-left: auto;
+            margin-right: auto; /* Centrage pour le titre centré */
+        }
+        /* Style pour les attributions de citation */
+        .citation-attribution {
+            display: block;
+            font-size: 0.75rem; /* text-xs */
+            color: #6b7280; /* text-gray-500 */
+            margin-top: 0.25rem; /* mt-1 */
+            font-weight: 600; /* font-semibold */
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR - Le fond blanc est sur le div interne centré -->
+    <nav class="sticky top-0 z-50">
+        <!-- Ajout de bg-white et shadow-sm ici pour limiter le fond blanc à la zone centrée -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white shadow-md rounded-b-xl">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center space-x-1 shrink-0">
+                    <span class="text-xl font-bold text-blue-600">Nicolas Guihaire</span>
+                    <span class="text-xl font-bold text-gray-400">&</span>
+                    <span class="text-xl font-bold text-orange-500">Aurélie Tasserie</span>
+                </div>
+                <div class="hidden lg:flex space-x-8">
+                    <a href="#expertise" class="nav-link">Expertise Cycles</a>
+                    <a href="#profils" class="nav-link">Profils</a>
+                    <a href="#citations" class="nav-link">Citations</a> 
+                    <a href="#langues" class="nav-link">Langues</a>
+                    <a href="#viabilite" class="nav-link">Viabilité</a>
+                </div>
+                <div>
+                    <a href="#contact" class="bg-blue-600 text-white font-bold py-2.5 px-6 rounded-full shadow-lg hover:bg-blue-700 transition whitespace-nowrap">Contactez-nous</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HEADER / INTRO - Le fond blanc est sur le div interne centré -->
+    <header class="text-center pt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white py-12 pb-16 rounded-xl shadow-md">
+            <h1 class="text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
+                Une Candidature <span class="title-gradient-text">Stratégique</span><br>pour la SRFACS
+            </h1>
+            <p class="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                Forts de <span class="font-bold text-gray-900">34 années d'expérience cumulées</span>, nous vous proposons un binôme d'enseignants complémentaires, rigoureux et prêts à s'investir durablement. Voici l'analyse visuelle de nos atouts pour votre école.
+            </p>
+        </div>
+    </header>
+
+    <!-- MAIN - Le contenu principal est centré et utilise des cartes blanches délimitées -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-24 pb-20">
+
+        <!-- 1. EXPERTISE COMPLÉMENTAIRE DES CYCLES -->
+        <section id="expertise" class="pt-12">
+            <div class="mb-10">
+                <h2 class="text-3xl font-bold text-gray-800">Expertise Complémentaire des Cycles</h2>
+                <!-- Trait en dégradé bleu-orange (expertise-underline) -->
+                <div class="expertise-underline"></div>
+                <!-- Sous-titre mis à jour -->
+                <p class="mt-4 text-gray-600 text-lg max-w-3xl">Nos parcours professionnels se complètent parfaitement pour couvrir l'intégralité du cursus primaire. Tandis qu'Aurélie est une experte reconnue de la Maternelle, Nicolas possède une maîtrise approfondie de l'Elémentaire.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Nicolas Card (Carte Blanche, style sobre) -->
+                <div class="card-cycle border-nicolas text-center">
+                    <!-- Titre mis à jour avec la durée en bleu -->
+                    <h3 class="text-2xl font-bold text-blue-600 mb-2">Nicolas (18 ans d'expérience)</h3>
+                    <p class="text-gray-500 mb-6 font-medium">Dominante Élémentaire (Cycles 2 & 3)</p>
+                    
+                    <!-- Conteneur du Doughnut Chart -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                        <div class="doughnut-chart-container col-span-1">
+                            <canvas id="nicolasCycleChart"></canvas>
+                        </div>
+                        
+                        <!-- Légende mise à jour pour l'ordre C1, C2, C3, en conservant les bonnes couleurs -->
+                        <div class="doughnut-legend text-left col-span-1">
+                            <h4 class="font-bold text-lg text-gray-700 mb-2">Répartition de 18 ans</h4>
+                            <!-- C1 (33%) : Bleu Moyen -->
+                            <div class="doughnut-label text-blue-600">
+                                <span class="doughnut-color-box bg-blue-600"></span> Cycle 1 (Maternelle) : <span class="font-bold ml-1">33%</span>
+                            </div>
+                            <!-- C2 (31%) : Bleu Clair -->
+                            <div class="doughnut-label text-blue-400">
+                                <span class="doughnut-color-box bg-blue-400"></span> Cycle 2 (CP-CE1) : <span class="font-bold ml-1">31%</span>
+                            </div>
+                            <!-- C3 (36%) : Bleu Foncé -->
+                            <div class="doughnut-label text-blue-900">
+                                <span class="doughnut-color-box bg-blue-900"></span> Cycle 3 (CM1-CM2) : <span class="font-bold ml-1">36%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aurélie Card (Carte Blanche, style sobre) -->
+                <div class="card-cycle border-aurelie text-center">
+                    <!-- Titre mis à jour avec la durée en orange -->
+                    <h3 class="text-2xl font-bold text-orange-500 mb-2">Aurélie (16 ans d'expérience)</h3>
+                    <p class="text-gray-500 mb-6 font-medium">Dominante Maternelle (Cycle 1)</p>
+                    
+                    <!-- Conteneur du Doughnut Chart -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                        <div class="doughnut-chart-container col-span-1">
+                            <canvas id="aurelieCycleChart"></canvas>
+                        </div>
+                        
+                        <!-- Légende (pourcentages confirmés) -->
+                        <div class="doughnut-legend text-left col-span-1">
+                            <h4 class="font-bold text-lg text-gray-700 mb-2">Répartition de 16 ans</h4>
+                            <div class="doughnut-label text-orange-600">
+                                <span class="doughnut-color-box bg-orange-600"></span> Cycle 1 (Maternelle) : <span class="font-bold ml-1">65%</span>
+                            </div>
+                            <div class="doughnut-label text-orange-400">
+                                <span class="doughnut-color-box bg-orange-400"></span> Cycle 2 (CP-CE1) : <span class="font-bold ml-1">25%</span>
+                            </div>
+                            <div class="doughnut-label text-orange-200">
+                                <span class="doughnut-color-box bg-orange-200"></span> Cycle 3 (CM1-CM2) : <span class="font-bold ml-1">10%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 2. PROFILS PÉDAGOGIQUES (RADAR CORRIGÉ ET AGRANDI) -->
+        <section id="profils" class="bg-white p-8 rounded-2xl shadow-md border border-gray-100">
+            <div class="grid lg:grid-cols-12 gap-10">
+                
+                <!-- Texte Gauche (4 colonnes) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800 border-l-4 border-blue-500 pl-4">Nos Profils Pédagogiques</h2>
+                        <div class="section-underline ml-5"></div>
+                    </div>
+                    <p class="text-gray-600 text-lg">
+                        Au-delà des cycles, nous apportons des compétences transversales qui s'enrichissent mutuellement.
+                    </p>
+
+                    <!-- Nicolas Box -->
+                    <div class="profile-box profile-box-blue">
+                        <h4 class="text-lg font-bold text-blue-700 mb-2">Nicolas : L'Expertise Technique</h4>
+                        <ul class="list-disc list-inside text-sm text-blue-900 space-y-1">
+                            <li>Rigueur didactique</li>
+                            <li>Compétences numériques avancées</li>
+                            <li>Gestion de classe structurée</li>
+                        </ul>
+                    </div>
+
+                    <!-- Aurélie Box -->
+                    <div class="profile-box profile-box-orange">
+                        <h4 class="text-lg font-bold text-orange-700 mb-2">Aurélie : La Pédagogie Active</h4>
+                        <ul class="list-disc list-inside text-sm text-orange-900 space-y-1">
+                            <li>Apprentissage par le langage</li>
+                            <li>Manipulation & Sensoriel</li>
+                            <li>Bienveillance & Climat serein</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Graphique Droite (8 colonnes) - RADAR MIS À JOUR ET AGRANDI -->
+                <div class="lg:col-span-7 flex flex-col items-center justify-center">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-6">Synergie des Compétences</h3>
+                    <!-- Class de taille ajustée : max-w-lg -> max-w-xl et h-96 -> h-[450px] -->
+                    <div class="w-full max-w-xl h-[450px]">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                    <!-- Texte mis à jour -->
+                    <p class="text-xs text-gray-400 mt-4 italic text-center">Estimation qualitative basée sur nos rapports d'inspection et pratiques quotidiennes</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2.5 NOUVELLE SECTION : CITATIONS -->
+        <section id="citations" class="bg-gray-50 p-8 rounded-2xl border border-gray-200 shadow-md">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-800">Validation de l'Expertise</h2>
+                <!-- AJOUT DU SOULIGNEMENT DÉGRADÉ -->
+                <div class="citation-underline mx-auto"></div>
+                <p class="text-gray-500 mt-2 font-medium uppercase tracking-widest text-sm">Citations des Inspecteurs & Directeurs</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Les cartes sont blanches et bien centrées -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-blue-500 relative">
+                    <div class="absolute -top-4 left-6 bg-blue-500 text-white px-3 py-1 text-xs font-bold uppercase rounded">Nicolas</div>
+                    
+                    <!-- Citation 1 de Nicolas avec attribution -->
+                    <blockquote class="italic text-gray-700 mb-2 border-l-2 border-gray-200 pl-4">
+                        "Rigoureux, organisé, il a une exigence de travail extrêmement précise et une <strong>bienveillance peu commune</strong> qui lui permettent d’obtenir le meilleur de ses élèves."
+                    </blockquote>
+                    <p class="citation-attribution mb-6">
+                        Directrice E. Meheut - septembre 2024 (<span class="text-gray-400 font-normal">4 années de travail dans son école</span>)
+                    </p>
+
+                    <!-- Citation 2 de Nicolas avec attribution -->
+                    <blockquote class="italic text-gray-700 mb-2 border-l-2 border-gray-200 pl-4">
+                        "Eu égard à ses compétences solides sur le plan didactique et pédagogique, Monsieur Guihaire pourrait envisager de devenir PEMF."
+                    </blockquote>
+                    <p class="citation-attribution">
+                        Inspecteur A. Cortes - janvier 2025
+                    </p>
+                </div>
+
+                <!-- Aurélie Citations -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-orange-500 relative">
+                    <div class="absolute -top-4 left-6 bg-orange-500 text-white px-3 py-1 text-xs font-bold uppercase rounded">Aurélie</div>
+                    
+                    <!-- Citation 1 d'Aurélie avec attribution -->
+                    <blockquote class="italic text-gray-700 mb-2 border-l-2 border-gray-200 pl-4">
+                        "Le climat de classe est <strong>serein et propice aux apprentissages</strong>, l’enseignante est bienveillante, très à l’écoute de ses élèves."
+                    </blockquote>
+                    <p class="citation-attribution mb-6">
+                        Inspectrice S. Bastien - mai 2024
+                    </p>
+
+                    <!-- Citation 2 d'Aurélie avec attribution -->
+                    <blockquote class="italic text-gray-700 mb-2 border-l-2 border-gray-200 pl-4">
+                        "Particulièrement appréciée par tous pour sa participation, son investissement personnel, professionnel, elle a su s’imposer comme l’élément moteur de sa classe."
+                    </blockquote>
+                    <p class="citation-attribution">
+                        Directrice C. Poustier - mars 2023 (<span class="text-gray-400 font-normal">3 années de travail dans son école</span>)
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. ATOUT TRILINGUE -->
+        <!-- La section entière est blanche et centrée -->
+        <section id="langues" class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Atout Trilingue pour la Californie</h2>
+                <p class="text-gray-500 text-lg mt-2 font-light">Référentiel CECRL</p>
+                <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-orange-500 mx-auto mt-4 rounded"></div>
+            </div>
+            
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-10">
+                Notre polyvalence linguistique est un atout majeur. Aurélie détient une <span class="font-bold text-gray-900">Maîtrise de Langues (LLCE Espagnol)</span>, garantissant un niveau académique supérieur.
+            </p>
+
+            <div class="max-w-4xl mx-auto h-72">
+                <canvas id="langueChart"></canvas>
+            </div>
+        </section>
+
+        <!-- 4. VIABILITÉ & ENGAGEMENT -->
+        <section id="viabilite">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 border-l-4 border-blue-900 pl-4">Viabilité & Engagement</h2>
+            
+            <div class="grid md:grid-cols-2 gap-12">
+                
+                <!-- Carte Sécurité Financière (fond sombre) -->
+                <div class="viability-card-dark">
+                    <div class="mb-6">
+                        <!-- Icone Bouclier SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-medium text-gray-300 mb-2">Sécurité Financière</h3>
+                    <div class="text-6xl font-extrabold text-green-400 mb-4 tracking-tighter">$40,000</div>
+                    <p class="text-gray-400 text-sm max-w-xs leading-relaxed">
+                        Épargne sécurisée dédiée aux frais d'installations et administratifs pour une arrivée sereine.
+                    </p>
+                </div>
+
+                <!-- Chronologie (fond blanc et centrée) -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="text-xl font-bold text-gray-800 mb-8">Chronologie du Projet</h3>
+                    
+                    <div class="timeline-container">
+                        <!-- Step 1 : Il y a 4 ans (GRIS) -->
+                        <div class="timeline-item">
+                            <div class="timeline-dot dot-gray"></div>
+                            <h4 class="font-bold text-gray-800 text-lg">Il y a 4 ans</h4>
+                            <p class="text-gray-600">Genèse du projet familial et début de l'épargne.</p>
+                            <!-- Segment 1: Plein (Past: Gris vers Bleu) -->
+                            <div class="timeline-segment segment-solid"></div>
+                        </div>
+
+                        <!-- Step 2 : Préparation (BLEU) -->
+                        <div class="timeline-item">
+                            <div class="timeline-dot dot-blue"></div>
+                            <h4 class="font-bold text-gray-800 text-lg">Préparation</h4>
+                            <!-- TEXTE MIS À JOUR ICI -->
+                            <p class="text-gray-600">Maintien du niveau d'Espagnol (Maîtrise) et perfectionnement de l'Anglais, grâce à des voyages et une auto-formation (méthode Harapps, lectures et V.O).</p>
+                            <!-- Segment 2: Plein (Current: Bleu vers Orange) -->
+                            <div class="timeline-segment segment-solid"></div>
+                        </div>
+
+                        <!-- Step 3 : Aujourd'hui (ORANGE) -->
+                        <div class="timeline-item">
+                            <div class="timeline-dot dot-orange"></div>
+                            <h4 class="font-bold text-orange-600 text-lg">Aujourd'hui</h4>
+                            <p class="text-gray-600">Candidature à la SRFACS avec dossier complet.</p>
+                            <!-- Segment 3: Pointillé (Future: Orange vers Vert) -->
+                            <div class="timeline-segment segment-dashed"></div>
+                        </div>
+
+                        <!-- Step 4 : Engagement (VERT) (Fin de la chronologie) -->
+                        <div class="timeline-item mb-0">
+                            <div class="timeline-dot dot-green"></div>
+                            <h4 class="font-bold text-green-600 text-lg">Engagement (3 à 5 ans)</h4>
+                            <p class="text-gray-600">Intégration durable au sein de l'équipe pédagogique.</p>
+                            <!-- Pas de segment après la dernière étape -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- FOOTER / CONTACT -->
+        <footer id="contact" class="text-center pt-16 pb-8 mt-12">
+            <!-- Ajout de bg-white et border pour délimiter le footer -->
+            <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-500 uppercase tracking-widest mb-8">Contact Direct</h3>
+                
+                <div class="flex flex-col md:flex-row justify-center gap-12 mb-8">
+                    <div>
+                        <p class="font-bold text-blue-600 text-xl">Nicolas Guihaire</p>
+                        <a href="mailto:nicolas.guihaire@ac-normandie.fr" class="text-gray-600 hover:text-blue-500">nicolas.guihaire@ac-normandie.fr</a>
+                        <p class="text-gray-500 mt-1 font-mono">+33 6 67 99 03 89</p>
+                    </div>
+                    <div>
+                        <p class="font-bold text-orange-500 text-xl">Aurélie Tasserie</p>
+                        <a href="mailto:aurelie.tasserie@ac-normandie.fr" class="text-gray-600 hover:text-orange-500">aurelie.tasserie@ac-normandie.fr</a>
+                        <p class="text-gray-500 mt-1 font-mono">+33 6 09 57 18 12</p>
+                    </div>
+                </div>
+                
+                <p class="text-xs text-gray-400">Infographie accompagnant la candidature de Nicolas Guihaire & Aurélie Tasserie pour la SRFACS.</p>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- CONFIGURATION DES GRAPHIQUES -->
+    <script>
+        // --- DONNÉES ET COULEURS ---
+        const nicolasColor = '#2563eb'; // Blue 600
+        const aurelieColor = '#f97316'; // Orange 500
+
+        // Couleurs pour les cycles de Nicolas (Bleus dégradés)
+        const nicolasCycleColors = [
+            '#1e3a8a', // Index 0: C3 - Blue 900 (Bleu Foncé)
+            '#60a5fa', // Index 1: C2 - Blue 400 (Bleu Clair)
+            '#2563eb'  // Index 2: C1 - Blue 600 (Bleu Moyen)
+        ];
+        // Couleurs pour les cycles d'Aurélie (Oranges dégradés)
+        const aurelieCycleColors = [
+            '#ea580c', // C1 - Orange 700
+            '#fb923c', // C2 - Orange 400
+            '#fed7aa'  // C3 - Orange 200
+        ];
+
+        // 1. DOUGHNUT CHART (Expertise Cycles)
+        
+        // --- NICOLAS CYCLE CHART ---
+        new Chart(document.getElementById('nicolasCycleChart'), {
+            type: 'doughnut',
+            data: {
+                // NOUVEL ORDRE : C1, C2, C3 (pour que C1 soit à 12h et tourne dans l'ordre)
+                labels: ['Cycle 1 (Maternelle)', 'Cycle 2 (CP-CE1)', 'Cycle 3 (CM1-CM2)'],
+                datasets: [{
+                    // NOUVELLES DONNÉES ET COULEURS DANS L'ORDRE C1, C2, C3
+                    data: [33, 31, 36], // C1 (33%), C2 (31%), C3 (36%)
+                    // COULEURS: [Couleur C1 (Moyen), Couleur C2 (Clair), Couleur C3 (Foncé)]
+                    backgroundColor: [nicolasCycleColors[2], nicolasCycleColors[1], nicolasCycleColors[0]],
+                    hoverBackgroundColor: [nicolasCycleColors[2], nicolasCycleColors[1], nicolasCycleColors[0]],
+                    borderWidth: 0,
+                    borderRadius: 10 
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%', // Épaisseur de l'anneau
+                plugins: {
+                    legend: {
+                        display: false // La légende est manuelle en HTML
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed + '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- AURÉLIE CYCLE CHART (Aucun changement, déjà en C1, C2, C3) ---
+        new Chart(document.getElementById('aurelieCycleChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Cycle 1 (Maternelle)', 'Cycle 2 (CP-CE1)', 'Cycle 3 (CM1-CM2)'],
+                datasets: [{
+                    data: [65, 25, 10], // 65%, 25%, 10%
+                    backgroundColor: aurelieCycleColors,
+                    hoverBackgroundColor: aurelieCycleColors,
+                    borderWidth: 0,
+                    borderRadius: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                            callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed + '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+
+        // 2. RADAR (Profils) 
+        new Chart(document.getElementById('radarChart'), {
+            type: 'radar',
+            data: {
+                // Labels dans l'ordre horaire : CN, RD, GdC, B&CS, AL, PJ&M, Créa
+                labels: [
+                    'Compétences Numériques', 
+                    'Rigueur Didactique', 
+                    'Gestion de Classe', 
+                    ['Bienveillance et', 'Climat serein'],
+                    'Approche Langagière', 
+                    ['Pédagogie par le jeu', 'et la manipulation'],
+                    'Créativité'
+                ],
+                datasets: [
+                    {
+                        label: 'Nicolas',
+                        data: [9.0, 9.0, 8.5, 9.5, 7.5, 6.5, 7.5], 
+                        borderColor: nicolasColor,
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                        pointBackgroundColor: nicolasColor,
+                        pointBorderColor: '#fff'
+                    },
+                    {
+                        label: 'Aurélie',
+                        data: [7.0, 8.0, 9.0, 9.5, 9.5, 9.5, 8.5], 
+                        borderColor: aurelieColor,
+                        backgroundColor: 'rgba(249, 115, 22, 0.2)',
+                        pointBackgroundColor: aurelieColor,
+                        pointBorderColor: '#fff'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        min: 0,
+                        max: 10,
+                        ticks: { 
+                            display: false,
+                            stepSize: 1, 
+                        },
+                        angleLines: {
+                            color: '#e2e8f0', 
+                            lineWidth: 1
+                        },
+                        grid: {
+                            color: '#e2e8f0', 
+                            lineWidth: 1 
+                        },
+                        pointLabels: { 
+                            font: { 
+                                size: 14, 
+                                family: 'Inter',
+                                weight: 'bold'
+                            },
+                            color: '#1e293b' 
+                        } 
+                    }
+                },
+                plugins: { legend: { position: 'top' } }
+            }
+        });
+
+        // 3. BARRES HORIZONTALES (Langues)
+        new Chart(document.getElementById('langueChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Anglais', 'Espagnol'],
+                datasets: [
+                    {
+                        label: 'Nicolas',
+                        data: [4, 2], // B2, A2
+                        backgroundColor: nicolasColor,
+                        barPercentage: 0.7
+                    },
+                    {
+                        label: 'Aurélie',
+                        data: [3, 5], // B1, C1
+                        backgroundColor: aurelieColor,
+                        barPercentage: 0.7
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        max: 6,
+                        ticks: {
+                            callback: function(val) { return ['', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'][val]; },
+                            font: { weight: 'bold' }
+                        }
+                    },
+                    y: { grid: { display: false } }
+                },
+                plugins: { legend: { position: 'top' } }
+            }
+        });
+    </script>
+</body>
+</html>
